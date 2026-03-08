@@ -1,0 +1,15 @@
+[Unit]
+Description=Telegram Detox Locker Companion Bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/tg_detox_locker
+EnvironmentFile=/opt/tg_detox_locker/.env
+ExecStart=/opt/tg_detox_locker/.venv/bin/python -m tg_detox_locker.bot
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
