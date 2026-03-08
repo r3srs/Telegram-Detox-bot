@@ -40,10 +40,8 @@ class ControlService:
     def __init__(
         self,
         session_factory: async_sessionmaker[AsyncSession],
-        app_settings: AppSettings,
     ) -> None:
         self._session_factory = session_factory
-        self._app_settings = app_settings
 
     async def queue_start(self, chat_id: int, duration_token: str | None) -> timedelta:
         async with self._session_factory() as session:

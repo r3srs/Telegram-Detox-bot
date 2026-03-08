@@ -7,8 +7,9 @@ from aiogram import Bot, Dispatcher, Router
 from aiogram.filters import Command
 from aiogram.types import Message
 
-from tg_detox_locker.config import load_settings
+from tg_detox_locker.config import load_bot_settings
 from tg_detox_locker.db import create_engine, create_session_factory
+from tg_detox_locker.duration import format_duration
 from tg_detox_locker.errors import ConfigurationError, DetoxError, ForbiddenError
 from tg_detox_locker.logging_utils import configure_logging
 from tg_detox_locker.presenters import format_health, format_history, format_status
@@ -36,13 +37,12 @@ def build_router(service: ControlService) -> Router:
     @router.message(Command("start", "help"))
     async def start_handler(message: Message) -> None:
         async def action() -> None:
-            settings, _ = await service.get_settings_and_run(message.chat.id)
             await message.answer(
                 "\n".join(
                     [
                         "Telegram Detox Locker",
-                        f"admin_chat_id: {settings.admin_chat_id}",
-                        "commands: /detox <duration>, /status, /history, /health",
+                        "Commands: /detox <duration>, /status, /history, /health",
+                        "Example: /detox 4h",
                     ]
                 )
             )
@@ -55,7 +55,7 @@ def build_router(service: ControlService) -> Router:
             parts = (message.text or "").split(maxsplit=1)
             duration = parts[1] if len(parts) > 1 else None
             queued_duration = await service.queue_start(message.chat.id, duration)
-            await message.answer(f"Detox queued for {queued_duration}. Worker will arm it shortly.")
+            await message.answer(f"Detox queued for {format_duration(queued_duration)}. Worker will arm it shortly.")
 
         await _guarded_reply(message, action)
 
@@ -87,11 +87,11 @@ def build_router(service: ControlService) -> Router:
 
 
 async def run_bot() -> None:
-    settings = load_settings()
+    settings = load_bot_settings()
     configure_logging(settings.log_level)
     engine = create_engine(settings.database_url)
     session_factory = create_session_factory(engine)
-    service = ControlService(session_factory, settings)
+    service = ControlService(session_factory)
     bot = Bot(token=settings.bot_token)
     dispatcher = Dispatcher()
     dispatcher.include_router(build_router(service))

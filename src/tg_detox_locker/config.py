@@ -57,6 +57,32 @@ class DatabaseSettings:
     database_url: str
 
 
+@dataclass(frozen=True, slots=True)
+class BotSettings:
+    database_url: str
+    bot_token: str
+    log_level: str
+
+
+@dataclass(frozen=True, slots=True)
+class CliSettings:
+    database_url: str
+    telegram_api_id: int
+    telegram_api_hash: str
+    master_key: bytes
+    default_detox_duration: str
+    log_level: str
+
+
+def _load_master_key() -> bytes:
+    raw_key = _env("DETOX_MASTER_KEY")
+    padding = "=" * (-len(raw_key) % 4)
+    master_key = base64.urlsafe_b64decode(raw_key + padding)
+    if len(master_key) != 32:
+        raise RuntimeError("DETOX_MASTER_KEY must decode to exactly 32 bytes")
+    return master_key
+
+
 @lru_cache(maxsize=1)
 def load_database_settings() -> DatabaseSettings:
     _load_dotenv()
@@ -64,19 +90,37 @@ def load_database_settings() -> DatabaseSettings:
 
 
 @lru_cache(maxsize=1)
+def load_bot_settings() -> BotSettings:
+    _load_dotenv()
+    return BotSettings(
+        database_url=_env("DATABASE_URL"),
+        bot_token=_env("BOT_TOKEN"),
+        log_level=os.getenv("LOG_LEVEL", "INFO"),
+    )
+
+
+@lru_cache(maxsize=1)
+def load_cli_settings() -> CliSettings:
+    _load_dotenv()
+    return CliSettings(
+        database_url=_env("DATABASE_URL"),
+        telegram_api_id=int(_env("TELEGRAM_API_ID")),
+        telegram_api_hash=_env("TELEGRAM_API_HASH"),
+        master_key=_load_master_key(),
+        default_detox_duration=os.getenv("DEFAULT_DETOX_DURATION", "4h"),
+        log_level=os.getenv("LOG_LEVEL", "INFO"),
+    )
+
+
+@lru_cache(maxsize=1)
 def load_settings() -> AppSettings:
     _load_dotenv()
-    raw_key = _env("DETOX_MASTER_KEY")
-    padding = "=" * (-len(raw_key) % 4)
-    master_key = base64.urlsafe_b64decode(raw_key + padding)
-    if len(master_key) != 32:
-        raise RuntimeError("DETOX_MASTER_KEY must decode to exactly 32 bytes")
     return AppSettings(
         database_url=_env("DATABASE_URL"),
         bot_token=_env("BOT_TOKEN"),
         telegram_api_id=int(_env("TELEGRAM_API_ID")),
         telegram_api_hash=_env("TELEGRAM_API_HASH"),
-        master_key=master_key,
+        master_key=_load_master_key(),
         check_interval_seconds=_env_int("CHECK_INTERVAL_SECONDS", 2),
         reconcile_interval_seconds=_env_int("RECONCILE_INTERVAL_SECONDS", 30),
         restore_retry_seconds=_env_int("RESTORE_RETRY_SECONDS", 60),

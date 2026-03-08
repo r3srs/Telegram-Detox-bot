@@ -7,7 +7,7 @@ from getpass import getpass
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
-from tg_detox_locker.config import load_database_settings, load_settings
+from tg_detox_locker.config import load_cli_settings, load_database_settings
 from tg_detox_locker.crypto import SecretBox
 from tg_detox_locker.db import create_engine, create_session_factory
 from tg_detox_locker.duration import parse_duration
@@ -39,7 +39,7 @@ async def _init_db() -> None:
 
 
 async def _run_onboarding(phone: str, admin_chat_id: int, overwrite: bool) -> None:
-    settings = load_settings()
+    settings = load_cli_settings()
     configure_logging(settings.log_level)
     secret_box = SecretBox(settings.master_key)
     default_duration_seconds = int(parse_duration(settings.default_detox_duration).total_seconds())
@@ -93,7 +93,7 @@ async def _run_onboarding(phone: str, admin_chat_id: int, overwrite: bool) -> No
 
 
 async def _run_recover() -> None:
-    settings = load_settings()
+    settings = load_cli_settings()
     configure_logging(settings.log_level)
     secret_box = SecretBox(settings.master_key)
     engine = create_engine(settings.database_url)
