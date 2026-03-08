@@ -110,6 +110,13 @@ DATABASE_URL=sqlite+aiosqlite:///./local.db
 
 For production, prefer `Postgres`.
 
+## Per-Process Env Requirements
+
+- `init-db`: only `DATABASE_URL`
+- `detox-bot`: `DATABASE_URL`, `BOT_TOKEN`
+- `onboarding` and `recover`: `DATABASE_URL`, `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`, `DETOX_MASTER_KEY`
+- `detox-worker`: full configuration from `.env`
+
 ## Operational Notes
 
 - The worker must stay online during the entire detox run.
