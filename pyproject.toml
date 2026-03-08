@@ -10,7 +10,15 @@ readme = "README.md"
 requires-python = ">=3.12,<3.14"
 license = { text = "MIT" }
 authors = [
-  { name = "Codex" },
+  { name = "r3srs" },
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
 ]
 keywords = ["telegram", "detox", "telethon", "self-lock", "bot"]
 dependencies = [
@@ -49,3 +57,4 @@ where = ["src"]
 addopts = "-q"
 asyncio_mode = "auto"
 testpaths = ["tests"]
+pythonpath = ["src"]

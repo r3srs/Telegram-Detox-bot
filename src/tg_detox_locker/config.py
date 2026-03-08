@@ -52,6 +52,17 @@ class AppSettings:
     log_level: str
 
 
+@dataclass(frozen=True, slots=True)
+class DatabaseSettings:
+    database_url: str
+
+
+@lru_cache(maxsize=1)
+def load_database_settings() -> DatabaseSettings:
+    _load_dotenv()
+    return DatabaseSettings(database_url=_env("DATABASE_URL"))
+
+
 @lru_cache(maxsize=1)
 def load_settings() -> AppSettings:
     _load_dotenv()

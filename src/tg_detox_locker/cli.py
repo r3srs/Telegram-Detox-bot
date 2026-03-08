@@ -7,7 +7,7 @@ from getpass import getpass
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
-from tg_detox_locker.config import load_settings
+from tg_detox_locker.config import load_database_settings, load_settings
 from tg_detox_locker.crypto import SecretBox
 from tg_detox_locker.db import create_engine, create_session_factory
 from tg_detox_locker.duration import parse_duration
@@ -29,8 +29,8 @@ class _NoopNotifier:
 
 
 async def _init_db() -> None:
-    settings = load_settings()
-    engine = create_engine(settings.database_url)
+    database_settings = load_database_settings()
+    engine = create_engine(database_settings.database_url)
     try:
         async with engine.begin() as connection:
             await connection.run_sync(Base.metadata.create_all)
